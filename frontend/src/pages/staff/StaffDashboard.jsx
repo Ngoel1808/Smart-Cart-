@@ -58,8 +58,16 @@ export default function StaffDashboard() {
                 <tr key={product.id} className="hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <div className="h-12 w-12 flex-shrink-0 bg-slate-900 rounded-xl flex items-center justify-center text-2xl border border-white/5 shadow-inner">
-                        {product.icon}
+                      <div className="h-12 w-12 flex-shrink-0 bg-slate-900 rounded-xl flex items-center justify-center text-2xl border border-white/5 shadow-inner overflow-hidden">
+                        <img 
+                          src={product.image} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=0f172a&color=00ff9d&size=100&font-size=0.33`;
+                          }}
+                        />
                       </div>
                       <div className="ml-4">
                         <div className="font-bold text-white">{product.name}</div>
@@ -116,7 +124,7 @@ export default function StaffDashboard() {
 // Simple Add Product Modal Implementation
 function AddProductModal({ onClose, onAdd }) {
   const [formData, setFormData] = useState({
-    name: '', brand: '', mrp: '', sellingPrice: '', stock: '', category: 'snacks', aisle: '1', icon: '📦'
+    name: '', brand: '', mrp: '', sellingPrice: '', stock: '', category: 'Snacks', image: ''
   });
 
   const handleSubmit = (e) => {
@@ -126,20 +134,27 @@ function AddProductModal({ onClose, onAdd }) {
       mrp: parseFloat(formData.mrp),
       sellingPrice: parseFloat(formData.sellingPrice),
       stock: parseInt(formData.stock, 10),
+      image: formData.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=0f172a&color=00ff9d&size=300&font-size=0.33`
     });
     onClose();
   };
 
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="glass-panel p-8 rounded-3xl w-full max-w-md animate-in zoom-in-95 duration-200">
+      <div className="glass-panel p-8 rounded-3xl w-full max-w-lg animate-in zoom-in-95 duration-200">
         <h2 className="text-2xl font-bold text-white mb-6">Add New Product</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Product Name</label>
-            <input required type="text" className="w-full glass-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-          </div>
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1">Product Name</label>
+              <input required type="text" className="w-full glass-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1">Brand</label>
+              <input required type="text" className="w-full glass-input" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-400 mb-1">MRP (₹)</label>
               <input required type="number" min="0" step="0.01" className="w-full glass-input" value={formData.mrp} onChange={e => setFormData({...formData, mrp: e.target.value})} />
@@ -148,15 +163,23 @@ function AddProductModal({ onClose, onAdd }) {
               <label className="block text-sm font-medium text-slate-400 mb-1">Selling Price (₹)</label>
               <input required type="number" min="0" step="0.01" className="w-full glass-input" value={formData.sellingPrice} onChange={e => setFormData({...formData, sellingPrice: e.target.value})} />
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-400 mb-1">Initial Stock</label>
               <input required type="number" min="0" className="w-full glass-input" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Emoji Icon</label>
-              <input required type="text" className="w-full glass-input" value={formData.icon} onChange={e => setFormData({...formData, icon: e.target.value})} />
+              <label className="block text-sm font-medium text-slate-400 mb-1">Category</label>
+              <select className="w-full glass-input text-slate-200 bg-slate-900" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                <option value="Snacks">Snacks</option>
+                <option value="Beverages">Beverages</option>
+                <option value="Grocery">Grocery</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1">Image URL</label>
+              <input type="url" placeholder="https://..." className="w-full glass-input" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} />
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-8">
