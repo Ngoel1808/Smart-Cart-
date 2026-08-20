@@ -25,6 +25,7 @@ import StaffOrdersPage from './pages/staff/StaffOrdersPage';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 import ManagerStaffPage from './pages/manager/ManagerStaffPage';
 import ManagerLogsPage from './pages/manager/ManagerLogsPage';
+import ManagerCustomersPage from './pages/manager/ManagerCustomersPage';
 
 function App() {
   return (
@@ -62,6 +63,8 @@ function App() {
           <Route element={<ManagerLayout />}>
             <Route path="/manager/dashboard" element={<ManagerDashboard />} />
             <Route path="/manager/staff" element={<ManagerStaffPage />} />
+            <Route path="/manager/customers" element={<ManagerCustomersPage />} />
+            <Route path="/manager/orders" element={<StaffOrdersPage />} />
             <Route path="/manager/products" element={<StaffDashboard />} />
             <Route path="/manager/offers" element={<StaffDiscountsPage />} />
             <Route path="/manager/logs" element={<ManagerLogsPage />} />

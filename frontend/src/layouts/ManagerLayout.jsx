@@ -10,6 +10,8 @@ export default function ManagerLayout() {
   const navItems = [
     { name: 'Dashboard', path: '/manager/dashboard', icon: LayoutDashboard },
     { name: 'Staff Management', path: '/manager/staff', icon: Users },
+    { name: 'Customer Directory', path: '/manager/customers', icon: Users },
+    { name: 'Order History', path: '/manager/orders', icon: Package },
     { name: 'Products', path: '/manager/products', icon: Package },
     { name: 'Discounts & Offers', path: '/manager/offers', icon: Gift },
     { name: 'Activity Logs', path: '/manager/logs', icon: Activity },

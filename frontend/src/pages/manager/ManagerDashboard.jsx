@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { TrendingUp, Users, ShoppingBag, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function ManagerDashboard() {
   const { products } = useData();
+  const navigate = useNavigate();
   const lowStock = products.filter(p => p.stock < 20);
 
   const [activeModal, setActiveModal] = useState(null);
@@ -46,7 +48,7 @@ export default function ManagerDashboard() {
           trend="+5.2%" 
           isPositive={true}
           icon={<ShoppingBag className="w-6 h-6 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]" />}
-          onClick={() => setActiveModal('orders')}
+          onClick={() => navigate('/manager/orders')}
         />
         <StatCard 
           title="Active Customers" 
@@ -54,7 +56,7 @@ export default function ManagerDashboard() {
           trend="-2.1%" 
           isPositive={false}
           icon={<Users className="w-6 h-6 text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]" />}
-          onClick={() => setActiveModal('customers')}
+          onClick={() => navigate('/manager/customers')}
         />
         <StatCard 
           title="Low Stock Items" 
@@ -138,6 +140,28 @@ export default function ManagerDashboard() {
         </div>
       )}
 
+      {/* Active Modals */}
+      {activeModal === 'revenue' && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel p-8 rounded-3xl w-full max-w-md animate-in zoom-in-95 duration-200">
+            <h2 className="text-2xl font-bold text-white mb-6">Revenue Breakdown</h2>
+            <div className="space-y-4 mb-8">
+              {Object.entries(revenueByCategory).map(([category, amount]) => (
+                <div key={category} className="flex justify-between items-center p-4 bg-slate-900/50 rounded-xl border border-white/5">
+                  <span className="font-semibold text-slate-300">{category}</span>
+                  <span className="font-bold text-brand-400 text-lg">₹{amount.toLocaleString()}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center p-4 bg-brand-500/10 rounded-xl border border-brand-500/20">
+                <span className="font-bold text-white">Total Revenue</span>
+                <span className="font-bold text-brand-400 text-xl">₹38,000</span>
+              </div>
+            </div>
+            <button onClick={() => setActiveModal(null)} className="btn btn-secondary w-full">Close</button>
+          </div>
+        </div>
+      )}
+
       {activeModal === 'stock' && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="glass-panel p-8 rounded-3xl w-full max-w-md animate-in zoom-in-95 duration-200">
@@ -162,17 +186,6 @@ export default function ManagerDashboard() {
                 ))
               )}
             </div>
-            <button onClick={() => setActiveModal(null)} className="btn btn-secondary w-full">Close</button>
-          </div>
-        </div>
-      )}
-
-      {/* Simple placeholders for the other two */}
-      {(activeModal === 'orders' || activeModal === 'customers') && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="glass-panel p-8 rounded-3xl w-full max-w-md animate-in zoom-in-95 duration-200 text-center">
-            <h2 className="text-xl font-bold text-white mb-4">Detailed View</h2>
-            <p className="text-slate-400 mb-8">Navigate to the detailed {activeModal === 'orders' ? 'Orders' : 'Customers'} page from the sidebar to view full analytics.</p>
             <button onClick={() => setActiveModal(null)} className="btn btn-secondary w-full">Close</button>
           </div>
         </div>
