@@ -20,6 +20,7 @@ import OffersPage from './pages/customer/OffersPage';
 import OrdersPage from './pages/customer/OrdersPage';
 import StoreCatalogPage from './pages/customer/StoreCatalogPage';
 import StaffDashboard from './pages/staff/StaffDashboard';
+import StaffDiscountsPage from './pages/staff/StaffDiscountsPage';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
         <Route element={<RoleRoute allowedRoles={['STAFF', 'MANAGER']} />}>
           <Route element={<StaffLayout />}>
             <Route path="/staff/dashboard" element={<StaffDashboard />} />
+            <Route path="/staff/discounts" element={<StaffDiscountsPage />} />
             <Route path="/staff" element={<Navigate to="/staff/dashboard" replace />} />
           </Route>
         </Route>
