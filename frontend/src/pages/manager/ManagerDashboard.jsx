@@ -7,6 +7,8 @@ export default function ManagerDashboard() {
   const { products } = useData();
   const lowStock = products.filter(p => p.stock < 20);
 
+  const [activeModal, setActiveModal] = useState(null);
+
   // Mock revenue data for chart
   const data = [
     { name: 'Mon', revenue: 4000 },
@@ -17,6 +19,13 @@ export default function ManagerDashboard() {
     { name: 'Sat', revenue: 8000 },
     { name: 'Sun', revenue: 7500 },
   ];
+
+  // Calculate real revenue from mock products for the modal
+  const revenueByCategory = {
+    Snacks: 15400,
+    Beverages: 12600,
+    Grocery: 10000
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-slate-200">
@@ -29,6 +38,7 @@ export default function ManagerDashboard() {
           trend="+12.5%" 
           isPositive={true}
           icon={<TrendingUp className="w-6 h-6 text-brand-400 drop-shadow-[0_0_8px_rgba(0,255,157,0.8)]" />}
+          onClick={() => setActiveModal('revenue')}
         />
         <StatCard 
           title="Total Orders" 
@@ -36,6 +46,7 @@ export default function ManagerDashboard() {
           trend="+5.2%" 
           isPositive={true}
           icon={<ShoppingBag className="w-6 h-6 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]" />}
+          onClick={() => setActiveModal('orders')}
         />
         <StatCard 
           title="Active Customers" 
@@ -43,6 +54,7 @@ export default function ManagerDashboard() {
           trend="-2.1%" 
           isPositive={false}
           icon={<Users className="w-6 h-6 text-purple-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]" />}
+          onClick={() => setActiveModal('customers')}
         />
         <StatCard 
           title="Low Stock Items" 
@@ -51,6 +63,7 @@ export default function ManagerDashboard() {
           isPositive={false}
           isAlert={true}
           icon={<AlertTriangle className="w-6 h-6 text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]" />}
+          onClick={() => setActiveModal('stock')}
         />
       </div>
 
@@ -102,13 +115,78 @@ export default function ManagerDashboard() {
           </button>
         </div>
       </div>
+
+      {/* Modals for Stat Cards */}
+      {activeModal === 'revenue' && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel p-8 rounded-3xl w-full max-w-md animate-in zoom-in-95 duration-200">
+            <h2 className="text-2xl font-bold text-white mb-6">Revenue Breakdown</h2>
+            <div className="space-y-4 mb-8">
+              {Object.entries(revenueByCategory).map(([category, amount]) => (
+                <div key={category} className="flex justify-between items-center p-4 bg-slate-900/50 rounded-xl border border-white/5">
+                  <span className="font-semibold text-slate-300">{category}</span>
+                  <span className="font-bold text-brand-400 text-lg">₹{amount.toLocaleString()}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center p-4 bg-brand-500/10 rounded-xl border border-brand-500/20">
+                <span className="font-bold text-white">Total Revenue</span>
+                <span className="font-bold text-brand-400 text-xl">₹38,000</span>
+              </div>
+            </div>
+            <button onClick={() => setActiveModal(null)} className="btn btn-secondary w-full">Close</button>
+          </div>
+        </div>
+      )}
+
+      {activeModal === 'stock' && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel p-8 rounded-3xl w-full max-w-md animate-in zoom-in-95 duration-200">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-red-400" />
+              Low Stock Items
+            </h2>
+            <div className="space-y-3 mb-8 max-h-60 overflow-y-auto pr-2">
+              {lowStock.length === 0 ? (
+                <p className="text-slate-400">All products are well stocked.</p>
+              ) : (
+                lowStock.map(p => (
+                  <div key={p.id} className="flex justify-between items-center p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+                    <div>
+                      <div className="font-bold text-white">{p.name}</div>
+                      <div className="text-xs text-red-300">{p.category}</div>
+                    </div>
+                    <div className="font-bold text-red-400 bg-red-950/50 px-3 py-1 rounded-lg">
+                      {p.stock} left
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <button onClick={() => setActiveModal(null)} className="btn btn-secondary w-full">Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Simple placeholders for the other two */}
+      {(activeModal === 'orders' || activeModal === 'customers') && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel p-8 rounded-3xl w-full max-w-md animate-in zoom-in-95 duration-200 text-center">
+            <h2 className="text-xl font-bold text-white mb-4">Detailed View</h2>
+            <p className="text-slate-400 mb-8">Navigate to the detailed {activeModal === 'orders' ? 'Orders' : 'Customers'} page from the sidebar to view full analytics.</p>
+            <button onClick={() => setActiveModal(null)} className="btn btn-secondary w-full">Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function StatCard({ title, value, trend, isPositive, isAlert, icon }) {
+function StatCard({ title, value, trend, isPositive, isAlert, icon, onClick }) {
   return (
-    <div className={`glass-card p-6 rounded-3xl border-l-4 ${isAlert ? 'border-l-red-500' : 'border-l-brand-500'}`}>
+    <button 
+      onClick={onClick}
+      className={`text-left w-full glass-card p-6 rounded-3xl border-l-4 transition-all hover:bg-white/5 hover:-translate-y-1 ${isAlert ? 'border-l-red-500 hover:shadow-[0_8px_20px_rgba(239,68,68,0.15)]' : 'border-l-brand-500 hover:shadow-[0_8px_20px_rgba(0,255,157,0.15)]'}`}
+    >
       <div className="flex justify-between items-start mb-4">
         <div className="bg-slate-900/50 p-3 rounded-2xl border border-white/5">
           {icon}
@@ -124,7 +202,7 @@ function StatCard({ title, value, trend, isPositive, isAlert, icon }) {
       </div>
       <h3 className="text-slate-400 font-medium text-sm mb-1">{title}</h3>
       <p className="text-3xl font-bold text-white">{value}</p>
-    </div>
+    </button>
   );
 }
 
