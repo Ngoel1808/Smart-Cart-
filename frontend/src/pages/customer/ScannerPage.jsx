@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 export default function ScannerPage() {
   const [isScanning, setIsScanning] = useState(true);
   const [detectedProduct, setDetectedProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const { products } = useData();
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function ScannerPage() {
         // Detect a random product after 3 seconds for demo purposes
         const randomProduct = products[Math.floor(Math.random() * products.length)];
         setDetectedProduct(randomProduct);
+        setQuantity(1); // reset quantity for new scan
         setIsScanning(false);
       }, 3000);
     }
@@ -27,7 +29,7 @@ export default function ScannerPage() {
 
   const handleAddToCart = () => {
     if (detectedProduct) {
-      addToCart(detectedProduct.id);
+      addToCart(detectedProduct.id, quantity);
       setDetectedProduct(null);
       setIsScanning(true);
     }
@@ -94,35 +96,56 @@ export default function ScannerPage() {
             {/* Product Info Card */}
             <div className="w-full glass-panel rounded-3xl p-6 border-brand-500/40 shadow-[0_0_30px_rgba(0,255,157,0.2)] animate-in slide-in-from-bottom-10">
               <div className="flex gap-4 items-center mb-6">
-                <div className="w-20 h-20 bg-slate-900 rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-white/5">
-                  {detectedProduct.icon}
+                <div className="w-20 h-20 bg-slate-900 rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-white/5 overflow-hidden shrink-0">
+                  <img src={detectedProduct.image} alt={detectedProduct.name} className="w-full h-full object-cover" />
                 </div>
-                <div>
-                  <h3 className="font-extrabold text-xl text-white tracking-wide">{detectedProduct.name}</h3>
+                <div className="flex-1">
+                  <h3 className="font-extrabold text-xl text-white tracking-wide line-clamp-1">{detectedProduct.name}</h3>
                   <p className="text-slate-400 text-sm font-medium mb-1">{detectedProduct.brand}</p>
-                  <div className="flex gap-2 items-center">
-                    <span className="font-black text-brand-400 text-2xl">₹{detectedProduct.sellingPrice}</span>
-                    {detectedProduct.sellingPrice < detectedProduct.mrp && (
-                      <span className="text-sm text-slate-500 line-through font-medium">₹{detectedProduct.mrp}</span>
-                    )}
+                  <div className="flex justify-between items-center w-full">
+                    <div className="flex gap-2 items-center">
+                      <span className="font-black text-brand-400 text-2xl">₹{detectedProduct.sellingPrice}</span>
+                      {detectedProduct.sellingPrice < detectedProduct.mrp && (
+                        <span className="text-sm text-slate-500 line-through font-medium">₹{detectedProduct.mrp}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => {setDetectedProduct(null); setIsScanning(true);}}
-                  className="flex-1 btn btn-secondary py-3 text-sm"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleAddToCart}
-                  className="flex-2 w-2/3 btn btn-primary py-3 text-sm shadow-[0_0_15px_rgba(0,255,157,0.4)]"
-                >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  Add to Cart
-                </button>
+              <div className="flex flex-col gap-4">
+                {/* Quantity Selector */}
+                <div className="flex justify-between items-center bg-slate-900/50 p-2 rounded-xl border border-white/5">
+                  <span className="text-sm text-slate-400 font-medium pl-2">Quantity</span>
+                  <div className="flex items-center bg-slate-950 border border-slate-700 rounded-lg overflow-hidden">
+                    <button 
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="px-3 py-1 text-slate-400 hover:bg-slate-800 transition-colors text-lg font-bold"
+                    >-</button>
+                    <span className="px-4 font-bold text-white text-sm">{quantity}</span>
+                    <button 
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="px-3 py-1 text-brand-500 hover:bg-slate-800 transition-colors text-lg font-bold"
+                    >+</button>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => {setDetectedProduct(null); setIsScanning(true);}}
+                    className="flex-1 btn btn-secondary py-3 text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleAddToCart}
+                    className="flex-2 w-2/3 btn btn-primary py-3 text-sm shadow-[0_0_15px_rgba(0,255,157,0.4)]"
+                  >
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    Add {quantity} to Cart
+                  </button>
+                </div>
               </div>
             </div>
           </div>

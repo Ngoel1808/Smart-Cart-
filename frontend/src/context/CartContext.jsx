@@ -8,13 +8,13 @@ export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useLocalStorage('smartcart_cart', []);
   const { products, offers } = useData();
 
-  const addToCart = (productId) => {
+  const addToCart = (productId, qty = 1) => {
     setCartItems(prev => {
       const existing = prev.find(item => item.productId === productId);
       if (existing) {
-        return prev.map(item => item.productId === productId ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map(item => item.productId === productId ? { ...item, quantity: item.quantity + qty } : item);
       }
-      return [...prev, { productId, quantity: 1 }];
+      return [...prev, { productId, quantity: qty }];
     });
   };
 
