@@ -6,9 +6,10 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useLocalStorage('smartcart_user', null);
+  const [users] = useLocalStorage('smartcart_users', mockUsers);
 
   const login = (email, password) => {
-    const foundUser = mockUsers.find(u => u.email === email && u.password === password);
+    const foundUser = users.find(u => u.email === email && u.password === password);
     if (foundUser) {
       setUser(foundUser);
       return { success: true, user: foundUser };
