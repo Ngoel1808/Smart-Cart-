@@ -26,12 +26,15 @@ export default function OffersPage() {
           if (!product) return null;
           
           return (
-            <div key={offer.id} className="glass-card p-6 rounded-3xl border-t border-brand-500/30 relative overflow-hidden group">
-              <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/20 transition-all"></div>
+            <div 
+              key={offer.id} 
+              className="glass-card p-6 rounded-3xl border-t border-brand-500/30 relative overflow-hidden group"
+            >
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/30 transition-all"></div>
               
               <div className="flex justify-between items-start mb-6 relative">
-                <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/5">
-                  {product.icon}
+                <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/5 overflow-hidden">
+                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="bg-brand-500/20 border border-brand-500/30 text-brand-400 px-3 py-1 rounded-full text-xs font-bold tracking-wider">
                   {offer.type}

@@ -34,17 +34,20 @@ export default function CustomerDashboard() {
       <section>
         <h2 className="text-xl font-bold text-white mb-4">Active In-Store Offers</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {offers.map(offer => (
-            <div key={offer.id} className="glass-card p-5 rounded-2xl flex items-center border-l-4 border-l-brand-500">
-              <div className="bg-brand-500/20 p-3 rounded-full mr-4 shadow-[0_0_15px_rgba(0,255,157,0.3)]">
-                <Tag className="w-6 h-6 text-brand-400" />
+          {offers.map(offer => {
+            const product = products.find(p => p.id === offer.productId);
+            return (
+              <div key={offer.id} className="glass-card p-5 rounded-2xl flex items-center border-l-4 border-l-brand-500">
+                <div className="bg-brand-500/20 p-3 rounded-full mr-4 shadow-[0_0_15px_rgba(0,255,157,0.3)] shrink-0">
+                  <Tag className="w-6 h-6 text-brand-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-lg">{offer.label}</h3>
+                  <p className="text-sm text-brand-400 font-medium">{product ? `On ${product.name}` : offer.type}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-white text-lg">{offer.title}</h3>
-                <p className="text-sm text-brand-400 font-medium">{offer.description}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -56,13 +59,16 @@ export default function CustomerDashboard() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {recentProducts.map(product => (
-            <div key={product.id} className="glass-card p-4 rounded-2xl flex flex-col items-center text-center group cursor-pointer">
-              <div className="w-24 h-24 mb-3 flex items-center justify-center text-4xl bg-slate-900 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-inner">
-                {product.icon}
+            <div 
+              key={product.id} 
+              className="glass-card p-4 rounded-2xl flex flex-col items-center text-center group cursor-pointer hover:border-brand-500/50 transition-colors"
+            >
+              <div className="w-24 h-24 mb-3 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-md">
+                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
               </div>
-              <h3 className="font-semibold text-slate-200 mb-1">{product.name}</h3>
-              <p className="text-brand-400 font-bold mb-2">₹{product.price}</p>
-              <span className="text-[10px] uppercase tracking-wider font-bold bg-slate-800 text-slate-400 px-2 py-1 rounded-full border border-slate-700">Aisle {product.aisle}</span>
+              <h3 className="font-semibold text-slate-200 mb-1 text-sm line-clamp-1">{product.name}</h3>
+              <p className="text-brand-400 font-bold mb-2">₹{product.sellingPrice}</p>
+              <span className="text-[10px] uppercase tracking-wider font-bold bg-slate-800 text-slate-400 px-2 py-1 rounded-full border border-slate-700">{product.category}</span>
             </div>
           ))}
         </div>
