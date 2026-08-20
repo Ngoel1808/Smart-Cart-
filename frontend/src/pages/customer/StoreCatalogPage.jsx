@@ -75,8 +75,16 @@ export default function StoreCatalogPage() {
               key={product.id} 
               className="glass-card p-5 rounded-3xl flex flex-col items-center text-center group border-t border-white/5 hover:border-brand-500/30 transition-colors"
             >
-              <div className="w-32 h-32 mb-4 rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-lg">
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+              <div className="w-32 h-32 mb-4 rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-lg bg-slate-900 flex items-center justify-center">
+                <img 
+                  src={product.image} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=0f172a&color=00ff9d&size=300&font-size=0.33`;
+                  }}
+                />
               </div>
               <h3 className="font-bold text-slate-200 mb-1 line-clamp-2">{product.name}</h3>
               <p className="text-sm text-slate-500 mb-3">{product.brand}</p>

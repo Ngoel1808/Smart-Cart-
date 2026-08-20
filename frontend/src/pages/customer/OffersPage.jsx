@@ -33,8 +33,16 @@ export default function OffersPage() {
               <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/30 transition-all"></div>
               
               <div className="flex justify-between items-start mb-6 relative">
-                <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/5 overflow-hidden">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/5 overflow-hidden shrink-0">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=0f172a&color=00ff9d&size=300&font-size=0.33`;
+                    }}
+                  />
                 </div>
                 <div className="bg-brand-500/20 border border-brand-500/30 text-brand-400 px-3 py-1 rounded-full text-xs font-bold tracking-wider">
                   {offer.type}

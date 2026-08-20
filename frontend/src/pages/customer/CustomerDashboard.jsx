@@ -1,9 +1,11 @@
 import React from 'react';
 import { Search, MapPin, Tag } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function CustomerDashboard() {
   const { products, offers } = useData();
+  const navigate = useNavigate();
   
   // Just show 4 random products for "Recently Viewed"
   const recentProducts = products.slice(0, 4);
@@ -20,13 +22,17 @@ export default function CustomerDashboard() {
             Shopping at <strong className="ml-1 text-slate-200">SmartCart Downtown</strong>
           </p>
         </div>
-        <div className="w-full md:w-96 relative">
+        <div 
+          onClick={() => navigate('/customer/catalog')}
+          className="w-full md:w-96 relative cursor-pointer group"
+        >
           <input 
             type="text" 
             placeholder="Search products in-store..." 
-            className="w-full glass-input pl-11"
+            className="w-full glass-input pl-11 pointer-events-none group-hover:border-brand-500/50 transition-colors"
+            readOnly
           />
-          <Search className="w-5 h-5 text-slate-500 absolute left-4 top-3.5" />
+          <Search className="w-5 h-5 text-slate-500 absolute left-4 top-3.5 group-hover:text-brand-400 transition-colors" />
         </div>
       </div>
 
@@ -63,8 +69,16 @@ export default function CustomerDashboard() {
               key={product.id} 
               className="glass-card p-4 rounded-2xl flex flex-col items-center text-center group cursor-pointer hover:border-brand-500/50 transition-colors"
             >
-              <div className="w-24 h-24 mb-3 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-md">
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+              <div className="w-24 h-24 mb-3 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-md bg-slate-900">
+                <img 
+                  src={product.image} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.name)}&background=0f172a&color=00ff9d&size=300&font-size=0.33`;
+                  }}
+                />
               </div>
               <h3 className="font-semibold text-slate-200 mb-1 text-sm line-clamp-1">{product.name}</h3>
               <p className="text-brand-400 font-bold mb-2">₹{product.sellingPrice}</p>
