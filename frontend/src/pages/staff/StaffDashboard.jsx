@@ -3,9 +3,10 @@ import { useData } from '../../context/DataContext';
 import { Plus, Search, Edit2, AlertCircle } from 'lucide-react';
 
 export default function StaffDashboard() {
-  const { products, addProduct } = useData();
+  const { products, addProduct, updateProduct } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -96,7 +97,10 @@ export default function StaffDashboard() {
                   <td className="px-6 py-4 text-sm text-slate-300 capitalize">{product.category}</td>
                   <td className="px-6 py-4 text-sm text-slate-300">Aisle {product.aisle}</td>
                   <td className="px-6 py-4 text-right text-sm font-medium">
-                    <button className="text-brand-400 hover:text-brand-300 transition-colors p-2 hover:bg-brand-500/10 rounded-lg">
+                    <button 
+                      onClick={() => setEditingProduct(product)}
+                      className="text-brand-400 hover:text-brand-300 transition-colors p-2 hover:bg-brand-500/10 rounded-lg"
+                    >
                       <Edit2 className="w-5 h-5" />
                     </button>
                   </td>
@@ -114,27 +118,33 @@ export default function StaffDashboard() {
         </div>
       </div>
 
-      {isAddModalOpen && (
-        <AddProductModal 
-          onClose={() => setIsAddModalOpen(false)} 
-          onAdd={addProduct} 
+      {(isAddModalOpen || editingProduct) && (
+        <ProductModal 
+          onClose={() => { setIsAddModalOpen(false); setEditingProduct(null); }} 
+          onSave={(data) => {
+            if (editingProduct) updateProduct(data);
+            else addProduct(data);
+          }} 
           existingCategories={[...new Set(products.map(p => p.category))]}
+          initialData={editingProduct}
         />
       )}
     </div>
   );
 }
 
-// Simple Add Product Modal Implementation
-function AddProductModal({ onClose, onAdd, existingCategories = [] }) {
-  const [formData, setFormData] = useState({
-    name: '', brand: '', mrp: '', sellingPrice: '', stock: '', category: existingCategories[0] || 'Snacks', image: ''
-  });
+// Simple Add/Edit Product Modal Implementation
+function ProductModal({ onClose, onSave, existingCategories = [], initialData = null }) {
+  const [formData, setFormData] = useState(
+    initialData || {
+      name: '', brand: '', mrp: '', sellingPrice: '', stock: '', category: existingCategories[0] || 'Snacks', image: ''
+    }
+  );
   const [isNewCategory, setIsNewCategory] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAdd({
+    onSave({
       ...formData,
       mrp: parseFloat(formData.mrp),
       sellingPrice: parseFloat(formData.sellingPrice),
@@ -147,7 +157,9 @@ function AddProductModal({ onClose, onAdd, existingCategories = [] }) {
   return (
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="glass-panel p-8 rounded-3xl w-full max-w-lg animate-in zoom-in-95 duration-200">
-        <h2 className="text-2xl font-bold text-white mb-6">Add New Product</h2>
+        <h2 className="text-2xl font-bold text-white mb-6">
+          {initialData ? 'Edit Product' : 'Add New Product'}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -208,7 +220,9 @@ function AddProductModal({ onClose, onAdd, existingCategories = [] }) {
           </div>
           <div className="flex justify-end gap-3 mt-8">
             <button type="button" onClick={onClose} className="btn btn-secondary px-6">Cancel</button>
-            <button type="submit" className="btn btn-primary px-8 shadow-[0_0_15px_rgba(0,255,157,0.4)]">Add Product</button>
+            <button type="submit" className="btn btn-primary px-8 shadow-[0_0_15px_rgba(0,255,157,0.4)]">
+              {initialData ? 'Save Changes' : 'Add Product'}
+            </button>
           </div>
         </form>
       </div>
