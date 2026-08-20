@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Mail, Calendar, Phone } from 'lucide-react';
 import { mockUsers } from '../../data/mockData';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export default function ManagerCustomersPage() {
   const [users] = useLocalStorage('smartcart_users', mockUsers);
+  const navigate = useNavigate();
 
   // Filter only customers
   const customers = users.filter(u => u.role === 'CUSTOMER');
@@ -46,7 +48,10 @@ export default function ManagerCustomersPage() {
               </div>
             </div>
             
-            <button className="w-full mt-6 btn btn-secondary text-sm py-2">
+            <button 
+              onClick={() => navigate('/manager/orders', { state: { searchTerm: customer.name } })}
+              className="w-full mt-6 btn btn-secondary text-sm py-2"
+            >
               View Purchase History
             </button>
           </div>

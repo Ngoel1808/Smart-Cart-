@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { mockUsers } from '../../data/mockData';
 import { FileText, Search, ChevronDown, ChevronUp, User } from 'lucide-react';
 
 export default function StaffOrdersPage() {
   const { orders, products } = useData();
-  const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const [searchTerm, setSearchTerm] = useState(location.state?.searchTerm || '');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.searchTerm) {
+      setSearchTerm(location.state.searchTerm);
+    }
+  }, [location.state]);
 
   const filteredOrders = orders.filter(order => {
     const customer = mockUsers.find(u => u.id === order.customerId);
