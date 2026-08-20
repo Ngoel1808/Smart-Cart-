@@ -216,6 +216,10 @@ function ProductModal({ onClose, onSave, existingCategories = [], initialData = 
             <div>
               <label className="block text-sm font-medium text-slate-400 mb-1">Image URL</label>
               <input type="url" placeholder="https://..." className="w-full glass-input" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} />
+              <p className="text-[10px] text-slate-500 mt-1.5 ml-1 leading-tight">
+                Right-click any image online and select <strong>"Copy image address"</strong>.<br/> 
+                (Do not use the page URL from the top address bar).
+              </p>
             </div>
           </div>
           <div className="flex justify-end gap-3 mt-8">
