@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { Plus, Search, Edit2, AlertCircle } from 'lucide-react';
+import { Plus, Search, Edit2, AlertCircle, Trash2 } from 'lucide-react';
 
 export default function StaffDashboard() {
-  const { products, addProduct, updateProduct } = useData();
+  const { products, addProduct, updateProduct, deleteProduct } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -97,12 +97,26 @@ export default function StaffDashboard() {
                   <td className="px-6 py-4 text-sm text-slate-300 capitalize">{product.category}</td>
                   <td className="px-6 py-4 text-sm text-slate-300">Aisle {product.aisle}</td>
                   <td className="px-6 py-4 text-right text-sm font-medium">
-                    <button 
-                      onClick={() => setEditingProduct(product)}
-                      className="text-brand-400 hover:text-brand-300 transition-colors p-2 hover:bg-brand-500/10 rounded-lg"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button 
+                        onClick={() => setEditingProduct(product)}
+                        className="text-brand-400 hover:text-brand-300 transition-colors p-2 hover:bg-brand-500/10 rounded-lg"
+                        title="Edit Product"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
+                            deleteProduct(product.id);
+                          }
+                        }}
+                        className="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-500/10 rounded-lg"
+                        title="Delete Product"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
