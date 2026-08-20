@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Scan, Tag, ShoppingCart, Clock, User, LogOut } from 'lucide-react';
+import { Home, Scan, Tag, ShoppingCart, Clock, User, LogOut, Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -11,6 +11,7 @@ export default function CustomerLayout() {
 
   const navItems = [
     { name: 'Home', path: '/customer/dashboard', icon: Home },
+    { name: 'Catalog', path: '/customer/catalog', icon: Store },
     { name: 'Scan', path: '/customer/scan', icon: Scan },
     { name: 'Offers', path: '/customer/offers', icon: Tag },
     { name: 'Cart', path: '/customer/cart', icon: ShoppingCart, count: cartItems.length },

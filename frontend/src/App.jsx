@@ -18,6 +18,7 @@ import ScannerPage from './pages/customer/ScannerPage';
 import CartPage from './pages/customer/CartPage';
 import OffersPage from './pages/customer/OffersPage';
 import OrdersPage from './pages/customer/OrdersPage';
+import StoreCatalogPage from './pages/customer/StoreCatalogPage';
 import StaffDashboard from './pages/staff/StaffDashboard';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 
@@ -33,6 +34,7 @@ function App() {
         <Route element={<RoleRoute allowedRoles={['CUSTOMER']} />}>
           <Route element={<CustomerLayout />}>
             <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+            <Route path="/customer/catalog" element={<StoreCatalogPage />} />
             <Route path="/customer/scan" element={<ScannerPage />} />
             <Route path="/customer/cart" element={<CartPage />} />
             <Route path="/customer/offers" element={<OffersPage />} />

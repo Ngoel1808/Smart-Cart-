@@ -5,8 +5,8 @@ import { Trash2, Plus, Minus, Tag, CreditCard, ChevronRight, ShoppingCart } from
 import { Link } from 'react-router-dom';
 
 export default function CartPage() {
-  const { cartItems, updateQuantity, removeFromCart, cartTotals } = useCart();
-  const { products } = useData();
+  const { cartItems, updateQuantity, removeFromCart, cartTotals, clearCart } = useCart();
+  const { products, addOrder } = useData();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   // Populate cart items with full product details
@@ -30,10 +30,19 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
-    // Simulate API call
+    // Simulate API call and save order
     setTimeout(() => {
+      addOrder({
+        customerId: 'u1',
+        items: cartItems.map(item => ({ productId: item.productId, quantity: item.quantity })),
+        subtotal: cartTotals.subtotal,
+        discount: cartTotals.discount,
+        total: cartTotals.total * 1.18,
+        status: 'Completed'
+      });
+      clearCart();
       alert("Payment Successful! Your receipt is generated.");
-      window.location.href = '/customer/dashboard';
+      window.location.href = '/customer/orders';
     }, 2000);
   };
 
