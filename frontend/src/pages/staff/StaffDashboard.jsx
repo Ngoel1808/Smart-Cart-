@@ -115,17 +115,22 @@ export default function StaffDashboard() {
       </div>
 
       {isAddModalOpen && (
-        <AddProductModal onClose={() => setIsAddModalOpen(false)} onAdd={addProduct} />
+        <AddProductModal 
+          onClose={() => setIsAddModalOpen(false)} 
+          onAdd={addProduct} 
+          existingCategories={[...new Set(products.map(p => p.category))]}
+        />
       )}
     </div>
   );
 }
 
 // Simple Add Product Modal Implementation
-function AddProductModal({ onClose, onAdd }) {
+function AddProductModal({ onClose, onAdd, existingCategories = [] }) {
   const [formData, setFormData] = useState({
-    name: '', brand: '', mrp: '', sellingPrice: '', stock: '', category: 'Snacks', image: ''
+    name: '', brand: '', mrp: '', sellingPrice: '', stock: '', category: existingCategories[0] || 'Snacks', image: ''
   });
+  const [isNewCategory, setIsNewCategory] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -170,12 +175,31 @@ function AddProductModal({ onClose, onAdd }) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Category</label>
-              <select className="w-full glass-input text-slate-200 bg-slate-900" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-                <option value="Snacks">Snacks</option>
-                <option value="Beverages">Beverages</option>
-                <option value="Grocery">Grocery</option>
-              </select>
+              <label className="flex justify-between items-center text-sm font-medium text-slate-400 mb-1">
+                <span>Category</span>
+                {isNewCategory && (
+                  <button type="button" onClick={() => setIsNewCategory(false)} className="text-[10px] text-brand-400 hover:underline">Cancel</button>
+                )}
+              </label>
+              {isNewCategory ? (
+                <input required type="text" placeholder="New Category Name..." className="w-full glass-input" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} autoFocus />
+              ) : (
+                <select 
+                  className="w-full glass-input text-slate-200 bg-slate-900" 
+                  value={formData.category} 
+                  onChange={e => {
+                    if(e.target.value === 'ADD_NEW') {
+                      setIsNewCategory(true);
+                      setFormData({...formData, category: ''});
+                    } else {
+                      setFormData({...formData, category: e.target.value});
+                    }
+                  }}
+                >
+                  {existingCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="ADD_NEW" className="text-brand-400 font-bold">+ Add New Category...</option>
+                </select>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-400 mb-1">Image URL</label>
