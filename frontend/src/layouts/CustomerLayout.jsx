@@ -10,13 +10,13 @@ export default function CustomerLayout() {
   const location = useLocation();
 
   const navItems = [
-    { name: 'Dashboard', path: '/customer/dashboard', icon: LayoutDashboard },
-    { name: 'Store Catalog', path: '/customer/catalog', icon: Store },
-    { name: 'Scanner', path: '/customer/scan', icon: ScanLine },
-    { name: 'My Cart', path: '/customer/cart', icon: ShoppingCart, count: cartItems.length },
+    { name: 'Home', path: '/customer/dashboard', icon: LayoutDashboard },
+    { name: 'Catalog', path: '/customer/catalog', icon: Store },
+    { name: 'Scan', path: '/customer/scan', icon: ScanLine },
+    { name: 'Cart', path: '/customer/cart', icon: ShoppingCart, count: cartItems.length },
     { name: 'Offers', path: '/customer/offers', icon: Tag },
-    { name: 'Order History', path: '/customer/orders', icon: Clock },
-    { name: 'My Rewards', path: '/customer/rewards', icon: Award },
+    { name: 'Orders', path: '/customer/orders', icon: Clock },
+    { name: 'Rewards', path: '/customer/rewards', icon: Award },
   ];
 
   return (
@@ -74,13 +74,21 @@ export default function CustomerLayout() {
         {/* Mobile Header */}
         <header className="md:hidden glass-panel rounded-none border-b border-white/10 p-4 sticky top-0 z-10 flex justify-between items-center">
           <h2 className="text-xl font-bold neon-text">SmartCart</h2>
-          <div className="relative">
-            <ShoppingCart className="w-6 h-6 text-slate-300" />
-            {cartItems.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-brand-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(0,255,157,0.5)]">
-                {cartItems.length}
-              </span>
-            )}
+          <div className="flex items-center gap-5">
+            <button 
+              onClick={logout} 
+              className="text-slate-400 hover:text-red-400 transition-colors flex items-center"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+            <Link to="/customer/cart" className="relative">
+              <ShoppingCart className="w-6 h-6 text-slate-300" />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-brand-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(0,255,157,0.5)]">
+                  {cartItems.length}
+                </span>
+              )}
+            </Link>
           </div>
         </header>
 
@@ -91,7 +99,7 @@ export default function CustomerLayout() {
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-panel rounded-none border-t border-white/10 flex justify-around items-center h-16 pb-safe z-50">
-        {navItems.map((item) => {
+        {navItems.filter(item => item.name !== 'Cart').map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname.includes(item.path);
           return (
@@ -101,12 +109,7 @@ export default function CustomerLayout() {
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive ? 'text-brand-400' : 'text-slate-500 hover:text-slate-300'}`}
             >
               <div className="relative">
-                <Icon className={`w-6 h-6 ${isActive ? 'drop-shadow-[0_0_8px_rgba(0,255,157,0.8)]' : ''}`} />
-                {item.count > 0 && item.name === 'Cart' && (
-                  <span className="absolute -top-1 -right-2 bg-brand-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(0,255,157,0.5)]">
-                    {item.count}
-                  </span>
-                )}
+                <Icon className={`w-5 h-5 ${isActive ? 'drop-shadow-[0_0_8px_rgba(0,255,157,0.8)]' : ''}`} />
               </div>
               <span className="text-[10px] font-medium">{item.name}</span>
             </Link>
