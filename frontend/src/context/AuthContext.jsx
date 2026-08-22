@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useLocalStorage('smartcart_user', null);
-  const [users] = useLocalStorage('smartcart_users', mockUsers);
+  const [users, setUsers] = useLocalStorage('smartcart_users', mockUsers);
 
   const login = (email, password) => {
     const foundUser = users.find(u => u.email === email && u.password === password);
@@ -21,8 +21,17 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const addPoints = (points) => {
+    if (user) {
+      const newPoints = (user.points || 0) + points;
+      const updatedUser = { ...user, points: newPoints };
+      setUser(updatedUser);
+      setUsers(users.map(u => u.id === user.id ? updatedUser : u));
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, addPoints }}>
       {children}
     </AuthContext.Provider>
   );

@@ -19,6 +19,7 @@ import CartPage from './pages/customer/CartPage';
 import OffersPage from './pages/customer/OffersPage';
 import OrdersPage from './pages/customer/OrdersPage';
 import StoreCatalogPage from './pages/customer/StoreCatalogPage';
+import CustomerRewardsPage from './pages/customer/CustomerRewardsPage';
 import StaffDashboard from './pages/staff/StaffDashboard';
 import StaffDiscountsPage from './pages/staff/StaffDiscountsPage';
 import StaffOrdersPage from './pages/staff/StaffOrdersPage';
@@ -44,6 +45,7 @@ function App() {
             <Route path="/customer/cart" element={<CartPage />} />
             <Route path="/customer/offers" element={<OffersPage />} />
             <Route path="/customer/orders" element={<OrdersPage />} />
+            <Route path="/customer/rewards" element={<CustomerRewardsPage />} />
             <Route path="/customer" element={<Navigate to="/customer/dashboard" replace />} />
           </Route>
         </Route>

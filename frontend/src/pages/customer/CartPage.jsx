@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useData } from '../../context/DataContext';
-import { Trash2, Plus, Minus, Tag, CreditCard, ChevronRight, ShoppingCart } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { Trash2, Plus, Minus, Tag, CreditCard, ChevronRight, ShoppingCart, Smartphone, Banknote } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function CartPage() {
   const { cartItems, updateQuantity, removeFromCart, cartTotals, clearCart } = useCart();
   const { products, addOrder } = useData();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const { user, addPoints } = useAuth();
+  const navigate = useNavigate();
+  
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('UPI');
 
   // Populate cart items with full product details
   const populatedCartItems = cartItems.map(item => {
@@ -28,21 +34,36 @@ export default function CartPage() {
     );
   }
 
-  const handleCheckout = () => {
-    setIsCheckingOut(true);
-    // Simulate API call and save order
+  const handleCheckoutClick = () => {
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentConfirm = () => {
+    setIsProcessing(true);
+    // Simulate Payment API call
     setTimeout(() => {
+      const finalTotal = cartTotals.total * 1.18;
+      
       addOrder({
-        customerId: 'u1',
+        customerId: user?.id || 'u1',
         items: cartItems.map(item => ({ productId: item.productId, quantity: item.quantity })),
         subtotal: cartTotals.subtotal,
         discount: cartTotals.discount,
-        total: cartTotals.total * 1.18,
+        total: finalTotal,
+        paymentMethod: paymentMethod,
         status: 'Completed'
       });
+      
+      // Award loyalty points (1 point per ₹100 spent)
+      const earnedPoints = Math.floor(finalTotal / 100);
+      addPoints(earnedPoints);
+
       clearCart();
-      alert("Payment Successful! Your receipt is generated.");
-      window.location.href = '/customer/orders';
+      setIsProcessing(false);
+      setShowPaymentModal(false);
+      
+      alert(`Payment Successful! You earned ${earnedPoints} Smart Points.`);
+      navigate('/customer/orders');
     }, 2000);
   };
 
@@ -135,19 +156,14 @@ export default function CartPage() {
             </div>
 
             <button 
-              onClick={handleCheckout}
-              disabled={isCheckingOut}
+              onClick={handleCheckoutClick}
               className="w-full btn btn-primary py-4 text-lg rounded-2xl flex justify-between items-center shadow-[0_0_20px_rgba(0,255,157,0.25)]"
             >
               <span className="flex items-center gap-2">
-                {isCheckingOut ? (
-                  <span className="animate-spin w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full inline-block"></span>
-                ) : (
-                  <CreditCard className="w-6 h-6" />
-                )}
-                {isCheckingOut ? 'Processing...' : 'Pay Now'}
+                <CreditCard className="w-6 h-6" />
+                Proceed to Pay
               </span>
-              {!isCheckingOut && <ChevronRight className="w-6 h-6" />}
+              <ChevronRight className="w-6 h-6" />
             </button>
             <p className="text-center text-xs text-slate-500 mt-4 font-medium flex items-center justify-center gap-1">
               <span className="w-2 h-2 bg-brand-500 rounded-full inline-block shadow-[0_0_5px_rgba(0,255,157,0.8)] animate-pulse"></span>
@@ -156,6 +172,57 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* Payment Gateway Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel p-8 rounded-3xl w-full max-w-md animate-in zoom-in-95 duration-200 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <h2 className="text-2xl font-bold text-white mb-2 text-center">Complete Payment</h2>
+            <p className="text-slate-400 text-center mb-8">Choose a method to pay ₹{(cartTotals.total * 1.18).toFixed(2)}</p>
+            
+            <div className="space-y-3 mb-8">
+              <label className={`flex items-center p-4 rounded-xl cursor-pointer transition-all border ${paymentMethod === 'UPI' ? 'bg-brand-500/10 border-brand-500/50' : 'bg-slate-900/50 border-white/5 hover:bg-white/5'}`}>
+                <input type="radio" name="payment" value="UPI" checked={paymentMethod === 'UPI'} onChange={() => setPaymentMethod('UPI')} className="hidden" />
+                <Smartphone className={`w-6 h-6 mr-4 ${paymentMethod === 'UPI' ? 'text-brand-400' : 'text-slate-400'}`} />
+                <span className={`font-semibold ${paymentMethod === 'UPI' ? 'text-white' : 'text-slate-300'}`}>UPI (GPay, PhonePe)</span>
+              </label>
+              
+              <label className={`flex items-center p-4 rounded-xl cursor-pointer transition-all border ${paymentMethod === 'CARD' ? 'bg-brand-500/10 border-brand-500/50' : 'bg-slate-900/50 border-white/5 hover:bg-white/5'}`}>
+                <input type="radio" name="payment" value="CARD" checked={paymentMethod === 'CARD'} onChange={() => setPaymentMethod('CARD')} className="hidden" />
+                <CreditCard className={`w-6 h-6 mr-4 ${paymentMethod === 'CARD' ? 'text-brand-400' : 'text-slate-400'}`} />
+                <span className={`font-semibold ${paymentMethod === 'CARD' ? 'text-white' : 'text-slate-300'}`}>Credit / Debit Card</span>
+              </label>
+
+              <label className={`flex items-center p-4 rounded-xl cursor-pointer transition-all border ${paymentMethod === 'CASH' ? 'bg-brand-500/10 border-brand-500/50' : 'bg-slate-900/50 border-white/5 hover:bg-white/5'}`}>
+                <input type="radio" name="payment" value="CASH" checked={paymentMethod === 'CASH'} onChange={() => setPaymentMethod('CASH')} className="hidden" />
+                <Banknote className={`w-6 h-6 mr-4 ${paymentMethod === 'CASH' ? 'text-brand-400' : 'text-slate-400'}`} />
+                <span className={`font-semibold ${paymentMethod === 'CASH' ? 'text-white' : 'text-slate-300'}`}>Cash at Counter</span>
+              </label>
+            </div>
+
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setShowPaymentModal(false)} 
+                disabled={isProcessing}
+                className="btn btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handlePaymentConfirm} 
+                disabled={isProcessing}
+                className="btn btn-primary flex-1 flex justify-center items-center shadow-[0_0_15px_rgba(0,255,157,0.3)]"
+              >
+                {isProcessing ? (
+                  <span className="animate-spin w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full inline-block"></span>
+                ) : (
+                  `Pay ₹{(cartTotals.total * 1.18).toFixed(2)}`
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

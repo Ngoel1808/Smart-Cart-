@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Scan, Tag, ShoppingCart, Clock, User, LogOut, Store } from 'lucide-react';
+import { LayoutDashboard, ScanLine, ShoppingCart, Tag, Clock, Store, LogOut, Award, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -10,12 +10,13 @@ export default function CustomerLayout() {
   const location = useLocation();
 
   const navItems = [
-    { name: 'Home', path: '/customer/dashboard', icon: Home },
-    { name: 'Catalog', path: '/customer/catalog', icon: Store },
-    { name: 'Scan', path: '/customer/scan', icon: Scan },
+    { name: 'Dashboard', path: '/customer/dashboard', icon: LayoutDashboard },
+    { name: 'Store Catalog', path: '/customer/catalog', icon: Store },
+    { name: 'Scanner', path: '/customer/scan', icon: ScanLine },
+    { name: 'My Cart', path: '/customer/cart', icon: ShoppingCart, count: cartItems.length },
     { name: 'Offers', path: '/customer/offers', icon: Tag },
-    { name: 'Cart', path: '/customer/cart', icon: ShoppingCart, count: cartItems.length },
-    { name: 'Orders', path: '/customer/orders', icon: Clock },
+    { name: 'Order History', path: '/customer/orders', icon: Clock },
+    { name: 'My Rewards', path: '/customer/rewards', icon: Award },
   ];
 
   return (
