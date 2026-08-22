@@ -21,9 +21,9 @@ export default function LoginPage() {
     setError('');
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const result = login(email, password);
+    const result = await login(email, password);
     
     if (result.success) {
       if (result.user.role === 'CUSTOMER') navigate('/customer');
