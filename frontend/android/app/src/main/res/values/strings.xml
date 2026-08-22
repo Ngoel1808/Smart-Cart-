@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SmartCart</string>
+    <string name="title_activity_main">SmartCart</string>
+    <string name="package_name">com.smartcart.app</string>
+    <string name="custom_url_scheme">com.smartcart.app</string>
+</resources>
