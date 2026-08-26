@@ -1,21 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, Plus, Trash2 } from 'lucide-react';
-import { mockUsers } from '../../data/mockData';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { db, firebaseConfig } from '../../firebase';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, query, where } from 'firebase/firestore';
+import { initializeApp, getApps, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 
 export default function ManagerStaffPage() {
-  const [users, setUsers] = useLocalStorage('smartcart_users', mockUsers);
+  const [staffMembers, setStaffMembers] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const staffMembers = users.filter(u => u.role === 'STAFF');
+  // Fetch all staff members from Firestore
+  useEffect(() => {
+    const q = query(collection(db, 'users'), where('role', '==', 'STAFF'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const staffData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setStaffMembers(staffData);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
 
-  const handleAddStaff = (newStaff) => {
-    setUsers([...users, { ...newStaff, id: `u${Date.now()}`, role: 'STAFF' }]);
+  const handleAddStaff = async (newStaff) => {
+    try {
+      // We must initialize a secondary Firebase app to create a user account
+      // Otherwise, Firebase Auth will automatically log the Manager out and log the new Staff in!
+      let secondaryApp;
+      const apps = getApps();
+      const existingApp = apps.find(app => app.name === 'Secondary');
+      if (existingApp) secondaryApp = existingApp;
+      else secondaryApp = initializeApp(firebaseConfig, 'Secondary');
+      
+      const secondaryAuth = getAuth(secondaryApp);
+      
+      // 1. Create the Auth account
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newStaff.email, newStaff.password);
+      
+      // 2. Log out and destroy the secondary app immediately to prevent session cross-contamination
+      await signOut(secondaryAuth);
+      await deleteApp(secondaryApp);
+
+      // 3. Write their profile to Firestore (using our main DB instance)
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        name: newStaff.name,
+        email: newStaff.email,
+        role: 'STAFF',
+        points: 0
+      });
+      
+    } catch (err) {
+      console.error("Failed to add staff:", err);
+      alert(err.message);
+    }
   };
 
-  const handleDeleteStaff = (id) => {
+  const handleDeleteStaff = async (id) => {
     if (window.confirm("Are you sure you want to revoke this staff member's access?")) {
-      setUsers(users.filter(u => u.id !== id));
+      try {
+        // Deleting the document revokes their app access because the dashboard routing relies on the role in the DB.
+        // Full Auth deletion requires Admin SDK, but this secures the app.
+        await deleteDoc(doc(db, 'users', id));
+      } catch (err) {
+        console.error("Failed to revoke access:", err);
+      }
     }
   };
 
@@ -46,7 +93,11 @@ export default function ManagerStaffPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {staffMembers.map(staff => (
+            {loading ? (
+               <tr><td colSpan="4" className="px-6 py-12 text-center text-slate-400">Loading staff...</td></tr>
+            ) : staffMembers.length === 0 ? (
+               <tr><td colSpan="4" className="px-6 py-12 text-center text-slate-400">No staff members found.</td></tr>
+            ) : staffMembers.map(staff => (
               <tr key={staff.id} className="hover:bg-white/5 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -73,13 +124,6 @@ export default function ManagerStaffPage() {
                 </td>
               </tr>
             ))}
-            {staffMembers.length === 0 && (
-              <tr>
-                <td colSpan="4" className="px-6 py-12 text-center text-slate-400">
-                  No staff members found.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
@@ -96,10 +140,13 @@ export default function ManagerStaffPage() {
 
 function AddStaffModal({ onClose, onAdd }) {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAdd(formData);
+    setLoading(true);
+    await onAdd(formData);
+    setLoading(false);
     onClose();
   };
 
@@ -110,19 +157,21 @@ function AddStaffModal({ onClose, onAdd }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Full Name</label>
-            <input required type="text" className="w-full glass-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+            <input required type="text" className="w-full glass-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} disabled={loading} />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Login Email</label>
-            <input required type="email" className="w-full glass-input" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+            <input required type="email" className="w-full glass-input" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} disabled={loading} />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-400 mb-1">Temporary Password</label>
-            <input required type="text" className="w-full glass-input" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+            <input required type="text" minLength={6} className="w-full glass-input" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} disabled={loading} />
           </div>
           <div className="flex justify-end gap-3 mt-8">
-            <button type="button" onClick={onClose} className="btn btn-secondary px-6">Cancel</button>
-            <button type="submit" className="btn btn-primary px-8 shadow-[0_0_15px_rgba(0,255,157,0.4)]">Create Account</button>
+            <button type="button" onClick={onClose} className="btn btn-secondary px-6" disabled={loading}>Cancel</button>
+            <button type="submit" className="btn btn-primary px-8 shadow-[0_0_15px_rgba(0,255,157,0.4)]" disabled={loading}>
+              {loading ? 'Creating...' : 'Create Account'}
+            </button>
           </div>
         </form>
       </div>

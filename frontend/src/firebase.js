@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyCBtPz5hQqyTu2EbCAKLFSUeKOpBBm7B4M",
   authDomain: "smart-cart-33b90.firebaseapp.com",
   projectId: "smart-cart-33b90",
