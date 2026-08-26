@@ -90,6 +90,11 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    try {
+      await GoogleAuth.signOut();
+    } catch (e) {
+      console.log("Not signed in with Google, or Google sign out failed", e);
+    }
     await signOut(auth);
   };
 
