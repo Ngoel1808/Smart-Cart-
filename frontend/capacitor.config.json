@@ -1,5 +1,12 @@
 {
   "appId": "com.smartcart.app",
   "appName": "SmartCart",
-  "webDir": "dist"
+  "webDir": "dist",
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "serverClientId": "282991791138-vku7h7qgrsmjjo8397l2uvct194dckf1.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
+  }
 }

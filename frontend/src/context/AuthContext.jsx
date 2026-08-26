@@ -4,10 +4,13 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithCredential
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { mockUsers } from '../data/mockData'; // Fallback to know roles for new accounts
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 const AuthContext = createContext(null);
 
@@ -17,6 +20,7 @@ export function AuthProvider({ children }) {
 
   // Listen to Firebase Auth state changes
   useEffect(() => {
+    GoogleAuth.initialize();
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // Fetch custom user data (role, points, name) from Firestore
@@ -100,8 +104,40 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const googleLogin = async () => {
+    try {
+      const googleUser = await GoogleAuth.signIn();
+      const idToken = googleUser.authentication.idToken;
+      
+      const credential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, credential);
+      
+      // Check if user exists in Firestore, if not create profile
+      const docRef = doc(db, 'users', userCredential.user.uid);
+      const docSnap = await getDoc(docRef);
+      
+      let userData;
+      if (!docSnap.exists()) {
+        userData = {
+          name: userCredential.user.displayName || 'New Customer',
+          role: 'CUSTOMER',
+          points: 0,
+          email: userCredential.user.email
+        };
+        await setDoc(docRef, userData);
+      } else {
+        userData = docSnap.data();
+      }
+      
+      return { success: true, user: { id: userCredential.user.uid, email: userCredential.user.email, ...userData } };
+    } catch (error) {
+      console.error("Google login failed", error);
+      return { success: false, message: error.message || 'Google Sign-In failed' };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, addPoints }}>
+    <AuthContext.Provider value={{ user, login, googleLogin, logout, addPoints }}>
       {!loading && children}
     </AuthContext.Provider>
   );
