@@ -6,11 +6,13 @@ import {
   signOut, 
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithCredential
+  signInWithCredential,
+  signInWithPopup
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { mockUsers } from '../data/mockData'; // Fallback to know roles for new accounts
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { Capacitor } from '@capacitor/core';
 
 const AuthContext = createContext(null);
 
@@ -20,7 +22,9 @@ export function AuthProvider({ children }) {
 
   // Listen to Firebase Auth state changes
   useEffect(() => {
-    GoogleAuth.initialize();
+    if (Capacitor.isNativePlatform()) {
+      GoogleAuth.initialize();
+    }
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // Fetch custom user data (role, points, name) from Firestore
@@ -76,11 +80,17 @@ export function AuthProvider({ children }) {
 
   const googleLogin = async () => {
     try {
-      const googleUser = await GoogleAuth.signIn();
-      const idToken = googleUser.authentication.idToken;
+      let userCredential;
       
-      const credential = GoogleAuthProvider.credential(idToken);
-      const userCredential = await signInWithCredential(auth, credential);
+      if (Capacitor.isNativePlatform()) {
+        const googleUser = await GoogleAuth.signIn();
+        const idToken = googleUser.authentication.idToken;
+        const credential = GoogleAuthProvider.credential(idToken);
+        userCredential = await signInWithCredential(auth, credential);
+      } else {
+        const provider = new GoogleAuthProvider();
+        userCredential = await signInWithPopup(auth, provider);
+      }
       
       // Check if user exists in Firestore, if not create profile
       const docRef = doc(db, 'users', userCredential.user.uid);
