@@ -41,42 +41,7 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      let userCredential;
-      try {
-        // Try to sign in first
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        // If the user doesn't exist yet (for our demo), auto-register them!
-        if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-          userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          
-          // Determine demo role based on email or fallback to mockUsers
-          const mockMatch = mockUsers.find(u => u.email === email);
-          let role = 'CUSTOMER';
-          let name = 'New Customer';
-          
-          if (mockMatch) {
-            role = mockMatch.role;
-            name = mockMatch.name;
-          } else if (email.includes('manager')) {
-            role = 'MANAGER';
-            name = 'Store Manager';
-          } else if (email.includes('staff')) {
-            role = 'STAFF';
-            name = 'Staff Member';
-          }
-          
-          // Save the new user profile to Firestore
-          await setDoc(doc(db, 'users', userCredential.user.uid), {
-            name,
-            role,
-            points: 0,
-            email
-          });
-        } else {
-          throw err;
-        }
-      }
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
       // Fetch user data from Firestore to return immediately
       const docRef = doc(db, 'users', userCredential.user.uid);
