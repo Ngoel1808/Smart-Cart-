@@ -7,7 +7,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithCredential,
-  signInWithPopup
+  signInWithPopup,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { mockUsers } from '../data/mockData'; // Fallback to know roles for new accounts
@@ -116,8 +117,17 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, googleLogin, logout, addPoints }}>
+    <AuthContext.Provider value={{ user, login, googleLogin, logout, addPoints, resetPassword }}>
       {!loading && children}
     </AuthContext.Provider>
   );

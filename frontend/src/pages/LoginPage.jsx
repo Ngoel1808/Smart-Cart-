@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, resetPassword } = useAuth();
   
   const [role, setRole] = useState('CUSTOMER');
   const [email, setEmail] = useState('');
@@ -29,6 +29,19 @@ export default function LoginPage() {
       if (result.user.role === 'CUSTOMER') navigate('/customer');
       else if (result.user.role === 'STAFF') navigate('/staff');
       else if (result.user.role === 'MANAGER') navigate('/manager');
+    } else {
+      setError(result.message);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!email || email.includes('smartcart.com')) {
+      setError('Please enter your real email address first to reset your password.');
+      return;
+    }
+    const result = await resetPassword(email);
+    if (result.success) {
+      setError('✅ Password reset email sent! Please check your inbox.');
     } else {
       setError(result.message);
     }
@@ -114,7 +127,13 @@ export default function LoginPage() {
                 <input type="checkbox" className="mr-2 rounded bg-slate-900 border-slate-700 text-brand-500 focus:ring-brand-500/50" />
                 Remember me
               </label>
-              <a href="#" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">Forgot Password?</a>
+              <button 
+                type="button" 
+                onClick={handleResetPassword} 
+                className="text-brand-400 hover:text-brand-300 font-medium transition-colors"
+              >
+                Forgot Password?
+              </button>
             </div>
 
             <button type="submit" className="w-full btn btn-primary py-3.5 text-lg mt-8">
