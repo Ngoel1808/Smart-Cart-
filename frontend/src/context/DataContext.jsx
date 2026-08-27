@@ -4,7 +4,7 @@ import {
   collection, doc, setDoc, updateDoc, deleteDoc, 
   onSnapshot, query, orderBy, getDocs, writeBatch 
 } from 'firebase/firestore';
-import { mockProducts, mockOffers, mockOrders, mockActivityLogs } from '../data/mockData';
+
 
 const DataContext = createContext(null);
 
@@ -15,39 +15,7 @@ export function DataProvider({ children }) {
   const [activityLogs, setActivityLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Auto-seed database if empty
-  const checkAndSeedDatabase = async () => {
-    try {
-      const prodSnap = await getDocs(collection(db, 'products'));
-      if (prodSnap.empty) {
-        console.log("Database is empty! Auto-seeding mock data...");
-        const batch = writeBatch(db);
-        
-        mockProducts.forEach(p => {
-          batch.set(doc(db, 'products', p.id), p);
-        });
-        mockOffers.forEach(o => {
-          batch.set(doc(db, 'offers', o.id), o);
-        });
-        mockOrders.forEach(o => {
-          batch.set(doc(db, 'orders', o.id), o);
-        });
-        mockActivityLogs.forEach(a => {
-          batch.set(doc(db, 'activity', a.id), a);
-        });
-        
-        await batch.commit();
-        console.log("Database seeded successfully!");
-      }
-    } catch (e) {
-      console.error("Error seeding DB:", e);
-    }
-  };
-
   useEffect(() => {
-    // 1. Seed database if empty
-    checkAndSeedDatabase();
-
     // 2. Setup Real-time Listeners
     const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
       setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
