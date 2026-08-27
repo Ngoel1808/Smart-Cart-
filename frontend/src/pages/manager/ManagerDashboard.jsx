@@ -5,7 +5,7 @@ import { TrendingUp, Users, ShoppingBag, AlertTriangle, ArrowUpRight, ArrowDownR
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function ManagerDashboard() {
-  const { products } = useData();
+  const { products, activityLogs } = useData();
   const navigate = useNavigate();
   const lowStock = products.filter(p => p.stock < 20);
 
@@ -106,13 +106,23 @@ export default function ManagerDashboard() {
         <div className="glass-panel p-6 rounded-3xl flex flex-col">
           <h2 className="text-xl font-bold text-white mb-6 tracking-wide">Activity Log</h2>
           <div className="flex-1 space-y-4 overflow-y-auto">
-            <LogItem message="Staff Emma added 50 units of Oreo." time="10 mins ago" type="inventory" />
-            <LogItem message="Order #1042 completed." time="25 mins ago" type="order" />
-            <LogItem message="Stock alert: Lays Magic Masala running low." time="1 hour ago" type="alert" />
-            <LogItem message="Staff John updated price for Red Bull." time="2 hours ago" type="inventory" />
-            <LogItem message="Order #1041 completed." time="2.5 hours ago" type="order" />
+            {activityLogs && activityLogs.length > 0 ? (
+              activityLogs.slice(0, 5).map(log => (
+                <LogItem 
+                  key={log.id} 
+                  message={`${log.staffName}: ${log.action}`} 
+                  time={new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
+                  type={log.action.toLowerCase().includes('stock') ? 'alert' : 'inventory'} 
+                />
+              ))
+            ) : (
+              <p className="text-slate-400 text-sm italic">No recent activity.</p>
+            )}
           </div>
-          <button className="w-full mt-4 py-2 text-brand-400 font-medium hover:text-brand-300 transition-colors">
+          <button 
+            onClick={() => navigate('/manager/logs')}
+            className="w-full mt-4 py-2 text-brand-400 font-medium hover:text-brand-300 transition-colors"
+          >
             View All Logs
           </button>
         </div>
