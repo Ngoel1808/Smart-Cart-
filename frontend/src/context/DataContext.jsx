@@ -19,20 +19,29 @@ export function DataProvider({ children }) {
     // 2. Setup Real-time Listeners
     const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
       setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (err) => {
+      console.warn("Products snapshot error:", err);
     });
 
     const unsubOffers = onSnapshot(collection(db, 'offers'), (snapshot) => {
       setOffers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (err) => {
+      console.warn("Offers snapshot error:", err);
     });
 
     const qOrders = query(collection(db, 'orders'), orderBy('date', 'desc'));
     const unsubOrders = onSnapshot(qOrders, (snapshot) => {
       setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    }, (err) => {
+      console.warn("Orders snapshot error:", err);
     });
 
     const qActivity = query(collection(db, 'activity'), orderBy('timestamp', 'desc'));
     const unsubActivity = onSnapshot(qActivity, (snapshot) => {
       setActivityLogs(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    }, (err) => {
+      console.warn("Activity snapshot error:", err);
       setLoading(false);
     });
 
@@ -81,9 +90,10 @@ export function DataProvider({ children }) {
       products, addProduct, updateProduct, deleteProduct,
       offers, addOffer, deleteOffer,
       orders, addOrder,
-      activityLogs, addLog
+      activityLogs, addLog,
+      loading
     }}>
-      {!loading && children}
+      {children}
     </DataContext.Provider>
   );
 }
